@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X Post Maker</title>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+body{
+    background:#111;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    gap:25px;
+    padding:20px;
+}
+
+/* ===== KRAL ===== */
+.card{
+    width:550px;
+    max-width:100%;
+    background:#000;
+    border-radius:16px;
+    border:1px solid #2f3336;
+    padding:10px 16px 10px 16px;
+    box-shadow:0 0 50px rgba(255,255,255,0.03);
+}
+
+/* Header with avatar */
+.header{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:2px;
+}
+
+.avatar-wrapper{
+    width:40px;
+    height:40px;
+    flex-shrink:0;
+    cursor:pointer;
+    position:relative;
+}
+
+.avatar-wrapper img{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #2f3336;
+    display:block;
+}
+
+.avatar-placeholder{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:#2f3336;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:16px;
+    color:#71767b;
+    border:2px solid #2f3336;
+    transition:0.3s;
+}
+
+.avatar-placeholder:hover{
+    border-color:#1d9bf0;
+}
+
+.avatar-input{
+    display:none;
+}
+
+.user-info{
+    flex:1;
+}
+
+.user-info .display-name{
+    color:#e7e9ea;
+    font-size:15px;
+    font-weight:bold;
+    line-height:1.2;
+}
+
+.user-info .display-name input{
+    background:transparent;
+    border:none;
+    color:#e7e9ea;
+    font-size:15px;
+    font-weight:bold;
+    width:120px;
+    font-family:inherit;
+    padding:0;
+}
+
+.user-info .display-name input:focus{
+    outline:none;
+    border-bottom:2px solid #1d9bf0;
+}
+
+.user-info .username{
+    color:#71767b;
+    font-size:13px;
+    line-height:1.2;
+}
+
+.user-info .username input{
+    background:transparent;
+    border:none;
+    color:#71767b;
+    font-size:13px;
+    width:100px;
+    font-family:inherit;
+    padding:0;
+}
+
+.user-info .username input:focus{
+    outline:none;
+    border-bottom:2px solid #1d9bf0;
+}
+
+/* Post text */
+.content{
+    margin:3px 0 4px 0;
+}
+
+.content p{
+    color:#e7e9ea;
+    font-size:18px;
+    line-height:1.7;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    min-height:30px;
+    font-weight:400;
+    direction:rtl;
+    text-align:right;
+    font-family:tahoma;
+}
+
+/* Footer */
+.footer{
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+    color:#71767b;
+    font-size:13px;
+    gap:4px;
+    padding-top:2px;
+}
+
+.footer .left{
+    display:flex;
+    align-items:center;
+    gap:4px;
+}
+
+/* ===== Editor ===== */
+.editor{
+    width:550px;
+    max-width:100%;
+    background:#000;
+    border-radius:16px;
+    padding:20px;
+    border:1px solid #2f3336;
+}
+
+.editor textarea{
+    width:100%;
+    height:150px;
+    background:#16181c;
+    border:1px solid #2f3336;
+    border-radius:12px;
+    color:#e7e9ea;
+    padding:15px;
+    font-size:17px;
+    line-height:2;
+    resize:vertical;
+    font-family:tahoma;
+    direction:rtl;
+    text-align:right;
+}
+
+.editor textarea:focus{
+    outline:none;
+    border-color:#1d9bf0;
+}
+
+.editor textarea::placeholder{
+    color:#71767b;
+    direction:rtl;
+    text-align:right;
+}
+
+/* ===== Download Button ===== */
+.download-btn{
+    padding:14px 50px;
+    background:#1d9bf0;
+    color:#fff;
+    border:none;
+    border-radius:50px;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.download-btn:hover{
+    background:#1a8cd8;
+    transform:scale(1.03);
+}
+
+.download-btn:active{
+    transform:scale(0.97);
+}
+
+/* Responsive */
+@media (max-width: 600px){
+    .card, .editor{
+        width:100%;
+    }
+    .content p{
+        font-size:16px;
+    }
+    .user-info .display-name input{
+        width:80px;
+        font-size:13px;
+    }
+    .user-info .username input{
+        width:70px;
+        font-size:12px;
+    }
+}
+</style>
+
+</head>
+<body>
+
+<!-- ===== Card ===== -->
+<div class="card" id="card">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="avatar-wrapper" id="avatarWrapper">
+            <img id="avatarImage" src="" alt="Avatar" style="display:none;">
+            <div class="avatar-placeholder" id="avatarPlaceholder">👤</div>
+            <input type="file" class="avatar-input" id="avatarInput" accept="image/*">
+        </div>
+        <div class="user-info">
+            <div class="display-name">
+                <input type="text" id="displayNameInput" value="KRAL" maxlength="20">
+            </div>
+            <div class="username">
+                @<input type="text" id="usernameInput" value="ParsaXD" maxlength="15">
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Text -->
+    <div class="content">
+        <p id="messageDisplay">
+بلد نبود كمك بخواد! غيب ميشد، حالش بهتر ميشد برميگشت.
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="left">
+            <span id="liveTime">23:26</span>
+            <span>·</span>
+            <span id="liveDate">6/28/26</span>
+            <span>·</span>
+            <span id="liveViews">59K</span>
+            <span>Views</span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Editor ===== -->
+<div class="editor">
+    <textarea id="messageInput" placeholder="متن خود را بنویسید...">بلد نبود كمك بخواد! غيب ميشد، حالش بهتر ميشد برميگشت.</textarea>
+</div>
+
+<!-- ===== Download Button ===== -->
+<button class="download-btn" id="downloadBtn">⬇️ Download Post</button>
+
+<script>
+// ===== 1. Upload Avatar =====
+const avatarWrapper = document.getElementById('avatarWrapper');
+const avatarInput = document.getElementById('avatarInput');
+const avatarImage = document.getElementById('avatarImage');
+const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+
+avatarWrapper.addEventListener('click', function(){
+    avatarInput.click();
+});
+
+avatarInput.addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = function(event){
+            avatarImage.src = event.target.result;
+            avatarImage.style.display = 'block';
+            avatarPlaceholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// ===== 2. Update Text =====
+const messageInput = document.getElementById('messageInput');
+const messageDisplay = document.getElementById('messageDisplay');
+
+messageInput.addEventListener('input', function(){
+    messageDisplay.textContent = this.value;
+});
+
+// ===== 3. Live Time, Date & Views =====
+function updateTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('liveTime').textContent = hours + ':' + minutes;
+    
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const year = String(now.getFullYear()).slice(-2);
+    document.getElementById('liveDate').textContent = month + '/' + day + '/' + year;
+}
+
+updateTime();
+setInterval(updateTime, 10000);
+
+// ===== 4. Download Card =====
+document.getElementById('downloadBtn').addEventListener('click', function(){
+    const btn = this;
+    btn.textContent = '⏳ Generating...';
+    btn.disabled = true;
+
+    html2canvas(document.getElementById('card'), {
+        scale: 2.5,
+        backgroundColor: '#000000',
+        useCORS: true,
+        logging: false
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'x-kral.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.textContent = '⬇️ Download Post';
+        btn.disabled = false;
+    }).catch(() => {
+        alert('Error! Please try again.');
+        btn.textContent = '⬇️ Download Post';
+        btn.disabled = false;
+    });
+});
+</script>
+
+</body>
+</html>
